@@ -1,0 +1,28 @@
+%! Package = cs577
+%! Author = Len Washington III
+%! Date = 08/28/2025
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cs577}[2025/08/28 A styling package for the class: CS 577 - Deep.]
+
+\RequirePackage{kvoptions}
+
+\SetupKeyvalOptions{
+	family=cs,
+	prefix=cs@
+}
+
+\DeclareStringOption{title}
+\DeclareStringOption[Len Washington III]{author}
+\DeclareStringOption[\today]{date}
+\DeclareStringOption[{Deep}]{subject}
+\DeclareStringOption[{CS 577}]{subjectCode}
+
+\ProcessKeyvalOptions*
+
+\RequirePackage[author=\cs@author,
+	title=\cs@title,
+	date=\cs@date,
+	subject=\cs@subject,
+	code=\cs@subjectCode
+]{iitacademics}
