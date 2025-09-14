@@ -1,0 +1,203 @@
+%! Author = Len Washington III
+%! Date = 9/12/25
+
+% Preamble
+\documentclass[
+	lecture={3},
+	title={Classification and Automatic Differentiation},
+]{cs577notes}
+
+% Document
+\begin{document}
+
+%<*Lecture-3>
+\lecture{3}{Classification and Automatic Differentiation}
+\section{Functions vs conditional probability}\label{sec:functions-vs-conditional-probability}
+\begin{minipage}[t]{0.45\textwidth}
+	Function:
+	\[ \begin{aligned}
+		x \rightarrow y\\ y = f(x; \theta)
+	\end{aligned} \]
+	Completely deterministic (1 action to 1 possibility)
+\end{minipage}\hfill%
+\begin{minipage}[t]{0.45\textwidth}
+	Conditional probability\\
+	1 to many possibilities
+\end{minipage}
+
+\begin{itemize}
+	\item Logits:
+	\begin{itemize}
+		\item Magnitudes of unnormalized have no meaning
+	\end{itemize}
+	\item Softmax: logits $\rightarrow$ probability vector
+	\begin{equation}
+		\Call{Softmax}{\vec{z}} = \frac{1}{\sum_{j=1}^{K} \exp(z_{j})} \left[ \begin{array}{c}
+			\exp(z_{1})\\ \vdots\\ \exp(z_{k})
+		\end{array} \right]
+		= \left[ \begin{array}{c}
+			\Call{Softmax}{\vec{z}}_{1}\\ \vdots\\ \Call{Softmax}{\vec{z}}_{k}
+		\end{array} \right]
+		= \left[ \begin{array}{c}
+			p_{1}\\ \vdots\\ p_{k}
+		\end{array} \right]
+		\label{eq:softmax}
+	\end{equation}
+\end{itemize}
+
+\section{The Story So Far}\label{sec:the-story-so-far}
+You know
+\begin{itemize}
+	\item how to create a probability vector $\vec{p}$ from (raw) logits $\vec{z}$
+	\item how to draw labels from $y$ from it
+	\item But where does $\vec{z}$ come from?
+\end{itemize}
+
+\section{Multiclass classification}\label{sec:multiclass-classification}
+\begin{itemize}
+	\item A classifier
+	% TODO: Try to find the reverse in command
+	\[ \chi \in \vec{x} \rightarrow f(\vec{x}; \vec{\theta}) \in \mathbb{R}^{K} \]
+	\item A linear classifier
+	\[ \begin{aligned}
+		\vec{W} \in \mathbb{R}^{d\times K}, \vec{\theta} = \vec{W}\\
+		f(\vec{x}; \vec{\theta}) = \vec{x}{\vec{W}}
+	\end{aligned} \]
+	where $d$ is the input dimension (e.g. \# of pixels), $K$ is the \# of classes, and $\vec{x}$ is a row vector.
+	\begin{itemize}
+		\item For MNIST digit recognition $\approx92\%$ test accuracy using a ``good'' linear model.
+	\end{itemize}
+	\item What does the output vector mean?
+\end{itemize}
+
+\section{Conditional Probability}\label{sec:conditional-probability}
+Whenever you use cross-entropy to train a linear model/deep model learning, you are assuming that your model is reflective of real world probability.
+
+\section{Negative Log-Likelihood}\label{sec:negative-log-likelihood}
+\begin{equation}
+	\min_{\vec{\theta}} \sum_{i=1}^{m} -\log \left( \text{softmax}\left( f\left( \vec{x}^{(i)}; \vec{\theta} \right) \right)_{y^{(i)}} \right)
+	\label{eq:nll}
+\end{equation}
+
+\section{The Cross Entropy Loss}\label{sec:the-cross-entropy-loss}
+\begin{equation}
+	-\log \left( \text{softmax}\left( \vec{z}^{(i)} \right)_{y^{(i)}} \right) =: L\left( \vec{z}^{(i)}, y^{(i)} \right)
+	\label{eq:cross-entropy-loss}
+\end{equation}
+where $\vec{z}^{(i)}$ is the prediction and $y^{(i)}$ is the label.
+
+\begin{itemize}
+	\item In regression, first arg and second arg are both floats.
+	\item In classification, first arg is a vector of floats and second arg is a (discrete) integer
+\end{itemize}
+
+\section{How to Calculate the Derivative}\label{sec:how-to-calculate-the-derivative}
+\begin{itemize}
+	\item W.grad means $\frac{d}{dW}$
+	\item W.shape should be equal to W.grad.shape
+\end{itemize}
+
+\[ \frac{\partial}{\partial \vec{W}} \vec{x}\vec{W} \Rightarrow x^{T} \]
+$x$ kind of stands as a constant, but you need to take the transpose for the shapes to make sense.
+
+\[ \begin{aligned}
+	\frac{\partial}{\partial \vec{W}} \left( L\left( \vec{x}\vec{W}, y \right) \right) &= \vec{x}^{T} \frac{\partial L}{\partial \vec{z}} \left( \vec{x}\vec{W}, y \right)
+\end{aligned} \]
+
+\subsection{Derivative of the Softmax}\label{subsec:derivative-of-the-softmax}
+\subsubsection{Case 1: $j \neq y$}\label{subsubsec:case-1}
+Numerator does not depend on $z_{j}$
+\[ \begin{aligned}
+	\frac{\partial}{\partial z_{j}} \left( \frac{\exp(z_{j})}{\sum_{l=1}^{K} \exp(z_{l})} \right) &= -\frac{\exp(z_{y})}{\left( \dots \right)^{2}}
+	&= \dots\\
+	&= -p_{y} \times p_{j}
+\end{aligned} \]
+
+\subsubsection{Case 2: $j = y$}\label{subsubsec:case-2}
+\[ \begin{aligned}
+	\frac{\partial}{\partial z_{y}} \left( \frac{\exp(z_{j})}{\sum_{l=1}^{K} \exp(z_{l})} \right) &= \frac{\partial}{\partial z_{y}} \left( \frac{1}{\sum_{l=1}^{K} \exp(z_{l} - z_{y})} \right)\\
+	&= \left( \frac{1}{\sum_{l=1}^{K} \exp(z_{l} - z_{y})} \right)^{2} \frac{\partial}{\partial z_{y}} \sum_{l=1}^{K} \exp(z_{l} - z_{y})\\
+	&= \dots\\
+	&= p_{y}(1 - p_{y})
+\end{aligned} \]
+
+\subsection{Derivative}\label{subsec:cross-entropy-derivative}
+\[ \begin{aligned}
+	\frac{\partial L}{\partial \vec{z}} \left( \vec{x}\vec{W}, y \right) &= \frac{\partial}{\partial \vec{z}} \left( -\log\left( \text{softmax}(\vec{z})_{y} \right) \right)\\
+	\frac{\partial}{\partial z_{j}} \left( -\log\left( \text{softmax}(\vec{z})_{y} \right) \right) &= -\frac{1}{\text{softmax}(\vec{z}_{y})} \times \frac{\partial}{\partial z_{j}}(\text{softmax}(\vec{z})_{y})\\ % TODO: Check LHS
+	\frac{\partial}{\partial z_{j}} (\text{softmax}(\vec{z})_{y}) &= \frac{\partial}{\partial z_{j}} \left( \frac{\exp(z_{j})}{\sum_{l=1}^{K} \exp(z_{l})} \right)
+\end{aligned} \]
+
+\begin{equation}
+	\frac{\partial L}{\partial \vec{z}} (\vec{z}, y) = \vec{p} - \left[ \begin{array}{c}
+		0\\ \vdots\\ 0\\ 1\\ 0\\ \vdots\\ 0
+	\end{array} \right] \leftarrow \text{  $y$-th position}
+	\label{eq:cross-entropy-derivative}
+\end{equation}
+
+If $p == $ one hot at $y$, then derivative is zero for that particular datapoint (gradient contribution is zero).
+The further away you are from being one hot at $y$, the ``larger'' the gradient.
+
+\section{Automatic Differentiation}\label{sec:automatic-differentiation}
+What is in an \emph{automatic differentiation} (AD) library?
+\begin{itemize}
+	\item Tensors \w\ ``grad'' attached (i.e., numbers in multidim arrays)
+	\item Operators (e.g., addition, matrix multiplication, logarithm, $\dots$)
+	\item Computation graph to keep track of the operations on tensors
+\end{itemize}
+
+\section{Running Example}\label{sec:autograd-running-example}
+\[ f(x, y) = \log\left( 1 + e^{-(x + y)} \right)(x + y) \]
+
+\subsection{Computing $f(x, y)$}\label{subsec:autograd-computing-f}
+\begin{itemize}
+	\item Easy to compute $f(x, y) \dots$
+\end{itemize}
+
+\subsection{Computational Graph}\label{subsec:computational-graph}
+\begin{itemize}
+	\item Leaves have no incoming edges
+	\item Intermediate \texttt{ag.Scalars} have blue discs
+	\item Constants are gray plates
+\end{itemize}
+
+\subsection{Ingredients for Algorithmic Computation}\label{subsec:ingredients-for-algorithmic-computation}
+\begin{itemize}
+	\item
+\end{itemize}
+
+\subsection{Quantities}\label{subsec:quantities}
+
+\subsection{Goal: (Partial) Derivatives}\label{subsec:goal-partial-derivatives}
+\begin{itemize}
+	\item Not just computing $f(x, y)$, but also:
+	\[ \frac{\partial}{\partial x} f(x, y), \frac{\partial}{\partial y} f(x, y) \]
+\end{itemize}
+
+\subsection{The \texttt{ag.Scalar} Class}\label{subsec:the-ag.scalar-class}
+\texttt{ag.Scalar} class -- \textcolor{diffpink}{value} plus additional information:
+\begin{description}
+	\item[\textcolor{diffpink}{grad}] -- keeps track of the gradient
+	\item[\textcolor{diffpink}{inputs}] -- tracks the inputs leading to a value
+	\item[op] -- label for the operation that produced the quantities (for visualization)
+	\item[\textcolor{diffpink}{\_backward}] -- function for propagating the gradient to the inputs
+	\item[label] -- label for drawing the computational graph (for visualization)
+\end{description}
+
+\textcolor{diffpink}{Pink bullet points} are the most mathematically important.
+Rest are just for readability.
+If you lose the final \text{ag.Scalar} object, then you basically lost the graph.
+
+\subsection{Key Property}\label{subsec:key-property}
+For assigning internal quantities $z_{l+1}, z_{l+2}, \dots$:
+
+\subsection{Chain Rule for $\frac{\partial f}{\partial z_{7}}$}\label{subsec:chain-rule-for-z7}
+By the chain rule:
+\[ \begin{aligned}
+	\frac{\partial}{\partial z_{7}} f(x, y) &= \frac{\partial}{\partial z_{8}} f(x, y) \times \frac{\partial z_{8}}{\partial z_{7}}\\
+	&= 1 \times \frac{\partial z_{8}}{\partial z_{7}}\\
+	&= \frac{\partial (z_{7} \times z_{3})}{\partial z_{7}}\\
+\end{aligned} \]
+
+%</Lecture-3>
+\end{document}

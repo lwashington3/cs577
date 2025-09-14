@@ -1,0 +1,27 @@
+%! Author = Len Washington III
+%! Date = 9/8/25
+
+% Preamble
+\documentclass[
+	title={CS 577 Notes},
+	lecture={0}
+]{cs577notes}
+
+% Document
+\begin{document}
+
+\begin{center}
+\vspace{\fill}
+{\Huge CS 577 Notes}
+\vspace{\fill}
+\end{center}
+
+\tableofcontents
+
+\let\oldbegindocument\document
+\foreach \chap in {1,...,3}{%
+	\ExecuteMetaData[lecture\chap]{Lecture-\chap}
+}
+\let\document\oldbegindocument
+
+\end{document}

@@ -1,0 +1,24 @@
+name: cs577
+
+
+services:
+    python:
+        build: .
+        image: cs577
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - ./jupyter:/cs577/jupyter
+            - ./jupyter/jupyter-settings.json:/usr/local/share/jupyter/lab/settings/overrides.json
+            - ./src/homework:/cs577/homework
+            - ./src/exercises:/cs577/exercises
+        ports:
+            - "127.0.0.1:9577:9577"
+        working_dir: /cs577/exercises
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [ gpu ]
+        runtime: nvidia

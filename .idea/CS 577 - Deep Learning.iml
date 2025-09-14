@@ -5,10 +5,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/styles/tex/latex/cs577" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/styles/tex/latex/cs577notes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/styles/tex/latex/iitacademics" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/styles/tex/latex/cs577homework" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/auxil" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Remote Python 3.13.5 Docker Compose (python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

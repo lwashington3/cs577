@@ -1,0 +1,297 @@
+%! Author = Len Washington III
+%! Date = 8/29/25
+
+% Preamble
+\documentclass[
+	lecture={1},
+	title={Introduction},
+]{cs577notes}
+
+\usepackage{minted}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+
+% Document
+\begin{document}
+
+%<*Lecture-1>
+\lecture{1}{Introduction}
+
+\section{Machine Learning Tasks}\label{sec:machine-learning-tasks}
+A partial list of common tasks:
+\begin{itemize}
+    \item Regression
+    \begin{itemize}
+        \item Predict real-valued quantity
+    \end{itemize}
+    \item Classification
+    \begin{itemize}
+    \item Discrete-valued quantity
+        \item Dog/Cat
+        \item Spam/Ham
+        \item Disease Recognition
+        \item LLMs predicting the next word
+        \item Facial detection
+        \item Named Entity Recognition (NER)
+        \item Recommendation Systems (Rec-Sys)
+    \end{itemize}
+    \item Dimensionality reduction
+    \item Density estimation (Stat. word for generative models)
+    \item Graph Learning
+    \item Routing Problem (Operation Research)
+\end{itemize}
+
+\section{(Row) Vectors}\label{sec:vectors}
+
+\[ \vec{v} = \left[ v_{1}\ v_{2}\ \dots\ v_{d} \right] \in \mathbb{R}^{d} \]
+
+Can represent
+\begin{itemize}
+    \item tabular data
+    \item image
+    \item word embedding
+    \item model parameters
+\end{itemize}
+
+\section{Matrices}\label{sec:matrices}
+
+\[ \mathbb{A} = \left[ \begin{array}{cccc}
+    A_{11} & A_{12} & \dots & A_{1n} \\
+    A_{21} & A_{22} & \dots & A_{2n} \\
+    \vdots & \vdots & \ddots & \vdots\\
+    A_{m1} & A_{m2} & \dots & A_{mn} \\
+\end{array} \right] \in \mathbb{R}^{m \times n} \]
+
+Can be interpreted as
+\begin{itemize}
+    \item A stack of row vectors
+    \item a linear transformation
+\end{itemize}
+
+\begin{center}
+\begin{minted}{python}
+A.shape = (m, n)
+\end{minted}
+\end{center}
+
+\section{Matrix Multiplication}\label{sec:matrix-multiplication}
+\[
+	\vec{A}\vec{B} = \left[ \begin{array}{cccc}
+		A_{11} & A_{12} & \dots & A_{1n} \\
+		A_{21} & A_{22} & \dots & A_{2n} \\
+		\vdots & \vdots & \ddots & \vdots\\
+		A_{m1} & A_{m2} & \dots & A_{mn} \\
+	\end{array} \right]
+		\left[ \begin{array}{cccc}
+		B_{11} & B_{12} & \dots & B_{1p} \\
+		B_{21} & B_{22} & \dots & B_{2p} \\
+		\vdots & \vdots & \ddots & \vdots\\
+		B_{n1} & B_{n2} & \dots & B_{np} \\
+	\end{array} \right] =: \vec{C}
+\]
+
+\begin{minted}{python}
+A = np.random.randn(3, 2)
+B = np.random.randn(2, 5)
+assert (A @ B).shape == (3, 5)
+\end{minted}
+
+\section{Inverse}\label{sec:inverse}
+$\vec{M}^{-1}$ is the matrix inverse of $\vec{M}$.
+\[ \begin{aligned}
+	\vec{M}^{-1}\vec{M} &= \vec{I}\\
+	\vec{M}\vec{M}^{-1} &= \vec{I}\\
+\end{aligned} \]
+
+\begin{minted}{python}
+M = np.random.randn(3, 3)
+M_inv = np.linalg.inv(M)
+M @ M_inv
+\end{minted}
+
+\section{Application: Curve Fitting}
+\begin{minted}{python}
+m = 6
+x = np.random.randn(m)
+noise = 0.25 * np.random.randn(m)
+y = 1.2 * np.sin(2*x) + 0.5 + noise
+\end{minted}
+
+Find a polynomial of degree $m - 1 = 5$ that goes through these points.
+
+\section{Polynomial of degree 5}\label{sec:polynomial-of-degree-5}
+We don't know the real world model, we can only guess.
+Let's use degree 5 polynomial.
+\[ \begin{aligned}
+	y &= b + w_{1}x + w_{2}x^{2} + w_{3}x^{3} + w_{4}x^{4} + w_{5}x^{5}\\
+	&= \left[ \begin{array}{cccccc}
+		1 & x & x^{2} & x^{3} & x^{4} & x^{5}
+	\end{array} \right]
+	\left[ \begin{array}{c}
+		b\\ w_{1}\\ w_{2}\\ w_{3}\\ w_{4}\\ w_{5}
+	\end{array} \right]\\
+%	&[1, 6] \@_{\text{mat mul}} [6] \rightarrow [1]
+\end{aligned}
+\]
+
+\[ \begin{aligned}
+    \vec{y} &= \mathbf{\tilde{X}} \vec{w} \\
+    \left[ \begin{array}{c} y_{1}\\ y_{2} \\ \vdots \end{array} \right] &= \left[ \begin{array}{ccccc}
+        1 & x_{1} & x_{1}^{2} & \dots & x_{1}^{5} \\
+        1 & x_{2} & x_{2}^{2} & \dots & x_{2}^{5} \\
+        \vdots & \vdots & \vdots & \ddots & \vdots
+    \end{array} \right] \left[ \begin{array}{c} b \\ w_{1} \\ w_{2} \\ \vdots \\ w_{5} \end{array} \right]
+\end{aligned} \]
+
+Why 5?
+It's a modeling assumption that the practitioner makes.
+We have 6 data points and 6 parameters.
+
+Constant + degree 1 + $\dots$ + degree 5 coeff = 6 parameters.
+
+\# unknowns = \# equalities
+
+``In general'', we expect a unique solution.
+
+\begin{minted}{python}
+m = 6
+X_tilde = np.vstack([ x**p for p in range(m) ]).T
+
+# how to do this with `np.hstack'
+np.hstack([ x**p for p in range(m) ]).reshape(1,6)
+\end{minted}
+
+\[ \begin{aligned}
+    \vec{y} &= \vec{\tilde{X}} \vec{w} \\
+    \left[ \begin{array}{c} y_{1}\\ y_{2}\\ \vdots\\ y_{m} \end{array} \right] &= \left[ \begin{array}{ccccc}
+        1 & x_{1} & x_{1}^{2} & \dots & x_{1}^{5} \\
+        1 & x_{2} & x_{2}^{2} & \dots & x_{2}^{5} \\
+        \vdots & \vdots & \vdots & \ddots & \vdots\\
+		1 & x_{m} & x_{m}^{2} & \dots & x_{m}^{5} \\
+	\end{array} \right] \left[ \begin{array}{c} b \\ w_{1} \\ w_{2} \\ \vdots \\ w_{5} \end{array} \right]\\
+	\vec{\tilde{X}}^{-1}\vec{y} &= \vec{\tilde{X}}^{-1}\vec{\tilde{X}} \vec{w} \\
+	\vec{\tilde{X}}^{-1}\vec{y} &= \vec{w} \\
+\end{aligned} \]
+
+\begin{minted}{python}
+# X_tilde @ w = y
+X_tilde_inv = np.linalg.inv(X_tilde)
+w = X_tilde_inv @ y # RHS only has known quantities.
+\end{minted}
+
+\begin{minted}{python}
+x_grid = np.linspace(np.min(x), np.max(x))
+X_tilde_grid = np.vstack([ x_grid ** p for p in range(m) ]).T
+y_grid = X_tilde_grid @ w
+plt.plt(x_grid, y_grid)
+
+assert (np.sum(np.square(y - X_tilde @ w)) < 1e-16) # Perfect fit
+\end{minted}
+
+\begin{itemize}
+    \item We fitted a degree 5 polynomial to 6 points.
+    \item What if we want to fit a degree 1 polynomial ($y = b + wx$) to 6 points?
+\end{itemize}
+
+\[ \begin{aligned}
+	\vec{y} &= \vec{\tilde{X}}\vec{w}
+	\left[ \begin{array}{c}
+		y_{1}\\ y_{2}\\ \vdots\\ y_{m}
+	\end{array} \right]
+	&= \left[ \begin{array}{cc}
+		1 & x_{1}\\
+		1 & x_{2}\\
+		\vdots & \vdots\\
+		1 & x_{m}
+	\end{array} \right]
+	\left[ \begin{array}{c}
+		b\\ w
+	\end{array} \right]
+\end{aligned} \]
+
+\begin{minted}{python}
+X_tilde = np.vstack([ x**p for p in range(2) ]).T
+# X_tilde @ w = y ?
+X_tilde_inv = np.linalg.inv(X_tilde)
+w = X_tilde_inv @ y
+# ...
+# LinAlgError: Last 2 dimensions of the array must be square
+\end{minted}
+
+\begin{minted}{python}
+X_tilde = np.vstack([ x**p for p in range(2) ]).T
+# X_tilde @ w = y ?
+X_tilde_inv = np.linalg.pinv(X_tilde) # <- replace `inv' with `pinv'
+w = X_tilde_inv @ y
+# ...
+# pinv == pseudo inverse, more on this later
+\end{minted}
+
+\section{Fitted Line}\label{sec:fitted-line}
+\begin{minted}{python}
+x_grid = np.linspace(np.min(x), np.max(x))
+X_tilde_grid = np.vstack([ x_grid**p for p in range(2) ]).T
+y_grid = X_tilde_grid @ w
+plt.plot(x_grid, y_grid)
+
+# np.sum( np.square(y - X_tilde @ w) ) == 1.80 (approximately)
+\end{minted}
+
+\section{Exercise 1: Training Error Versus Degree}\label{sec:exercise-1:-training-error-versus-degree}
+\begin{minted}{python}
+X_tilde = np.vstack([ x**p for p in range(maxdeg+1) ]).T
+
+# lines skipped
+
+training_error = np.sum( np.square(y - X_tilde @ w) )
+\end{minted}
+
+\section{Generalization: Performance on ``fresh'' data}\label{sec:generalization:-performance-on-fresh-data}
+\begin{minted}{python}
+m_test = 25
+x_test = np.random.randn(m_test)
+# filter to within same range as original training data [...]
+
+noise = 0.25 * np.random.randn(len(x_test))
+y_test = 1.2 * np.sin(2 * x_test) + 0.5 + noise
+\end{minted}
+
+\pagebreak
+
+\section{Linear Regression (1-dimensional samples)}
+Let $\vec{\theta} = \left[ \begin{array}{c} b \\ w \end{array} \right]$
+
+\[ \min_{w \in \mathbb{R}, b \in \mathbb{R}}  J(\vec{\theta}) := \frac{1}{m} \sum_{i=1}^{m} \left( y_{i} - f\left( x_{i}; \vec{\theta} \right) \right)^{2} \]
+
+$J\left( \vec{\theta} \right)$ is the risk $\dots$.
+Risk is the average loss.
+
+\section{The derivative test for local minimality}
+
+Let $J: \mathbb{R}^{d} \rightarrow \mathbb{R}$ be a differentiable function.
+
+Let $\vec{\theta} = \left[ \theta_{1}, \dots, \theta_{d} \right]^{T}$.
+The gradient of $J$ \wrt $\dots$
+
+\begin{itemize}
+    \item If $\vec{v} \in \mathbb{R}^{d}$ is a vector, then
+    \[ \nabla_{\vec{\theta}} \left( \vec{\theta}^{T}\vec{v} \right) = \vec{v} \]
+    \item If $\mathbf{A}$ is a matrix, then
+    \[ \nabla_{\vec{\theta}} \left( \vec{\theta}^{T} \mathbf{A} \vec{\theta} \right) = 2 \mathbf{A} \vec{\theta} \]
+\end{itemize}
+
+% TODO: Missing a lot of notes
+
+\section{Gradient Descent (GD)}
+Let $\epsilon_{k} > 0$ be learning rates, $k = 1, 2, \dots$
+\begin{itemize}
+    \item Initialize $\vec{\theta}$
+    \item While not converged ($k$ = iteration counter):
+    \begin{itemize}
+        \item Compute gradient: $\vec{g} \gets \nabla_{\vec{\theta}} J\left( \vec{\theta} \right)$
+        \item Compute update: $\vec{\theta} \gets \vec{\theta} - \epsilon_{k}\vec{g} $
+    \end{itemize}
+\end{itemize}
+%</Lecture-1>
+\end{document}

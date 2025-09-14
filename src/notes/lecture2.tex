@@ -1,0 +1,271 @@
+%! Author = Len Washington III
+%! Date = 8/29/25
+
+% Preamble
+\documentclass[
+	lecture={2},
+	title={{Regression, Probability, and Classification}},
+]{cs577notes}
+
+% Document
+\begin{document}
+
+\maketitle
+
+%<*Lecture-2>
+\lecture{2}{{Regression, Probability, and Classification}}
+$\dots$
+
+\section{Empirical Risk Minimization Unpacked}\label{sec:empirical-risk-minimization-unpacked}
+\[ \begin{aligned}
+	\min_{\vec{\theta} \in \Theta} J(\vec{\theta}) &:= \frac{1}{m} \sum_{i=1}^{m} L( wx_{i} + b, y_{i} )
+\end{aligned} \]
+
+\section{Key facts about gradient \wrt\ a vector}\label{sec:key-facts-about-gradient-wrt-a-vector}
+If $\vec{v} \in \mathbb{R}^{d}$ is a vector, then
+\[ \nabla_{\vec{\theta}} \left( \vec{\theta}^{T}\vec{v} \right) = \vec{v} \]
+Chain rule:
+If $f : \mathbb{R} \rightarrow \mathbb{R}$ has derivative $\frac{df}{dt}( \cdot )$, then
+\[ \begin{aligned}
+	\nabla_{\vec{\theta}} \left( f \left( \vec{\theta}^{T}\vec{v} \right) \right) &= \frac{df}{dt} \left( \nabla_{\vec{\theta}} \left( \vec{\theta}^{T}\vec{v} \right) \right)\\
+	   &= \frac{df}{dt} \left( \vec{\theta}^{T}\vec{v} \right) \vec{v}
+\end{aligned} \]
+
+\begin{minted}{python}
+lr = 0.01
+
+for k in range(10_000):
+	gradient = np.zeros_like(X[0])
+
+	for i in range(X.shape[0]):
+		gradient += -np.sign( y[i] - np.dot(X[i], theta)) * X[i]
+
+	gradient /= X.shape[0]
+	theta -= lr * gradient
+\end{minted}
+
+\section{Outlier and Nonlinear Models}\label{sec:outlier-and-nonlinear-models}
+\begin{itemize}
+	\item Recall linear model was sensitive to large noise.
+	What about the quadratic case?
+\end{itemize}
+
+\section{Summary}\label{sec:summary}
+We've studied
+\begin{itemize}
+	\item Linear models
+	\item Polynomials models
+	\item Square losses
+	\item Absolute values losses
+	\item \textbf{Next}: neural networks
+\end{itemize}
+
+\section{Polynomials of degree $d$}\label{sec:polynomials-of-degree-d}
+\begin{itemize}
+	\item Models of growing complexity.
+	\item Richer class of function.
+	\item More parameters.
+	\item More expressive.
+\end{itemize}
+
+Neural networks width/depth is analogous to the degree of a polynomial.
+
+\begin{table}[H]
+	\centering
+	\caption{}
+	\label{tab:}
+	\begin{tabular}{c|c|c}
+		& Expressiveness & Prone-ness to overfitting\\
+		\hline
+		More degree & High & Higher-ish\\
+		\hline
+		Less degree & Low & Low\\
+	\end{tabular}
+\end{table}
+
+Polynomial suffers from numerical issues when degree is higher.
+This affects NN less (why NN tolerates numerical issues better??).
+
+\section{Activation Functions}\label{sec:activation-functions}
+Rectified linear unit or ReLU.
+
+\[ \text{relu}(z) = \max(0, z) \]
+
+\begin{minted}{python}
+def relu(z):
+	return np.maximum(0, z)
+\end{minted}
+
+\section{One-neuron Network}\label{sec:one-neuron-network}
+Model params $\vec{\theta} = \left[ a\ b\ w \right] \in \vec{\Theta}$
+
+\[ f(x; \theta) = a \times \text{relu}(w \times x + b) \]
+
+\section{Two-neuron Network}\label{sec:two-neuron-network}
+Model params $\vec{\theta} = \left[ \vec{a}\ \vec{b}\ \vec{w} \right] \in \vec{\Theta}$ where
+$\vec{a} = \left[ \begin{array}{c}
+	a_{1}\\ a_{2}
+\end{array} \right]$,
+$\vec{b} = \left[ \begin{array}{c}
+	b_{1}\\ b_{2}
+\end{array} \right]$,
+$\vec{w} = \left[ \begin{array}{c}
+	w_{1}\\ w_{2}
+\end{array} \right]$
+
+\[ f(x; \theta) = a_{1} \times \text{relu}(w_{1} \times x_{1} + b_{1}) + a_{2} \times \text{relu}(w_{2} \times x_{2} + b_{2}) \]
+
+\section{Gradient Descent (GD)}\label{sec:gradient-descent-(gd)}
+Let $\epsilon_{k} > 0$ be learning rates, $k = 1, 2, \dots$
+\begin{itemize}
+	\item Initialize $\vec{\theta}$
+	\item While not converged ($k$ = iteration counter):
+	\begin{itemize}
+		\item Compute gradient $\dots$
+		\item Computer update $\vec{\theta} \gets \vec{\theta} \dots$
+	\end{itemize}
+\end{itemize}
+
+\section{Empirical Risk Minimization Unpacked}\label{sec:empirical-risk-minimization-unpacked-nn}
+\[ J(\vec{\theta}) \dots \]
+
+\[ \nabla_{\vec{\theta}} J_{i}( \theta ) = \nabla_{\vec{\theta}} L \left( f(x_{i}; \vec{\theta}), y_{i} \right) \]
+
+Observation: more parameters seems to make optimization easier.
+In other words, $\dots$
+
+\section{Probability}\label{sec:probability}
+We want to connect the optimization we did so far to something statistically grounded.
+Diffusion model was invented in or around 2015 based on statistical principles.
+Optimization didn't come out of the blue, they were based on statistical ideas.
+
+\begin{itemize}
+	\item Probability distribution: $p(\vec{x})$
+	\item $\vec{x}$ belongs with some set $\chi$
+	\item Sampling from the distribution
+	\[ \vec{x}^{(1)}, \dots, \vec{x}^{(m)}, \sim p(\vec{x}) \]
+	\item i.i.d stands from ``independently and identically distributed''
+\end{itemize}
+
+\subsection{Example: Gaussian}\label{subsec:example:-gaussian}
+\begin{itemize}
+	\item $\chi = \mathbb{R}$
+	\item $p(x)$ is the ``probability density function'' for the ``standard Gaussian'' distribution
+\begin{minted}{python}
+m = 100
+np.random.randn(m, 2)
+\end{minted}
+	\item We say that $x \sim p(\vec{x})$ is a \textit{continuous random vector}
+	\item What does it mean to have access to a distribution? It means we can sample from it.
+\end{itemize}
+
+\subsection{Example: Uniform Distribution}\label{subsec:example:-uniform-distribution}
+\begin{itemize}
+	\item
+\end{itemize}
+
+\subsection{Example: Bernoulli Distribution}\label{subsec:example:-bernoulli-distribution}
+\begin{itemize}
+	\item $\Gamma = \{0, 1\}$
+	\begin{itemize}
+		\item 1 = head, 0 = tail in a coin toss
+	\end{itemize}
+	\item $p(y)$ is the ``probability mass function'' for the ``Bernoulli'' distribution for a fair coin toss
+	\begin{minted}{python}
+m = 100
+np.random.randn(m) > 0
+	\end{minted}
+	\item Height of the density is how likely your sample lands here.
+	\item We say that $y \sim p(y)$ is a \textit{discrete random variable}.
+	\item $p(y)$ is the ``probability mass function'' for the ``Bernoulli'' distribution for a $q \in (0, 1)$ biased coin
+	\begin{minted}{python}
+m = 100
+q = 0.6
+np.random.randn(m) > 1 - q
+	\end{minted}
+\end{itemize}
+
+\section{Joint probability}\label{sec:joint-probability}
+\begin{itemize}
+	\item Joint probability distribution: $p(\vec{x}, y)$
+	\item $\vec{x}$ belongs to some set $\chi$
+	\item $\vec{y}$ belongs to some set $\gamma$
+	\item Sampling from $\dots$
+\end{itemize}
+
+How to construct a Joint probability distribution $p(\vec{x}, y)$?
+\begin{itemize}
+	\item Sample $\vec{x}$ from some density $p(\vec{x})$
+\begin{minted}{python}
+# Example
+m = 100
+x_train = np.random.randn(m, 2)
+\end{minted}
+	\item Pick some function $g: \chi \rightarrow \gamma$
+\begin{minted}{python}
+...
+\end{minted}
+	\item Add some noise
+\end{itemize}
+
+\section{Conditional Distribution}\label{sec:conditional-distribution}
+Conditional probability: $p(y | \vec{x})$ probability of $y$ given $\vec{x}$
+
+\section{Gaussian/normal distribution}\label{sec:gaussian/normal-distribution}
+\begin{itemize}
+	\item Assumption: $p_{\text{data}}(y | \vec{x})$ is distributed according to $y = \vec{w}^{T}\vec{x} + b + \epsilon$, where
+	\item Gaussian distribution \w\ mean $\mu$ and variance $\sigma^{2}$
+	\[ \epsilon \sim N\left( \mu, \sigma^{2} \right) \]
+	\item $y$ is deterministic function if not for noise $\epsilon$
+	\item The probability density function (PDF)
+	\begin{equation}
+		\begin{aligned}
+			N(\epsilon; \mu, \sigma^{2}) &= \frac{1}{\sqrt{2\pi\sigma^{2}}} \exp\left( -\frac{(\epsilon - \mu)^{2}}{2\sigma^{2}} \right)\\
+			N(\epsilon; \mu, \sigma^{2}) &= \frac{1}{\sqrt{2\pi\sigma^{2}}} \exp\left( -\frac{(y - (\vec{w}^{T}\vec{x} + b) - \mu)^{2}}{2\sigma^{2}} \right)\\
+		\end{aligned}
+		\label{eq:gaussian-pdf}
+	\end{equation}
+\end{itemize}
+
+\section{Maximum Likelihood}\label{sec:maximum-likelihood}
+Probability of observing the data.
+
+\begin{equation}
+	\prod_{i=1}^{m} p_{\text{model}} \left( y^{(i)} | \vec{x}^{(i)}; \vec{\theta} \right) = \prod_{i=1}^{m}  \frac{1}{\sqrt{2\pi\sigma^{2}}} \exp\left( -\frac{\left( y^{(i)} - f\left( \vec{x}^{(i)}; \vec{\theta} \right) \right)^{2}}{2\sigma^{2}} \right)
+	\label{eq:maximum-likelihood}
+\end{equation}
+
+\section{Joint probability for classification?}\label{sec:joint-probability-for-classification?}
+How to construct a Joint probability distribution $p_{\text{model}}(\vec{x}, y)$?
+\begin{itemize}
+	\item Sample $\vec{x}$ from some density $p(\vec{x})$
+	\begin{minted}{python}
+m = 100
+x_train = np.random.randn(m, 2)
+	\end{minted}
+	\item Suppose $\gamma = \{1, \dots, K\}$
+	\item Pick some function $f(x; \vec{\theta}): \chi \rightarrow \mathbb{R}^{K}$
+	\begin{minted}{python}
+W = np.random.randn(2, 10)
+b = np.random.randn(10)
+logits = np.dot(x_train, W) + b
+# logits are like scores for the categories
+	\end{minted}
+	\item The softmax function
+	\begin{minted}{python}
+def softmax(z):
+	exp_z = np.exp(z)
+	return exp_z / np.sum(exp_z)
+	\end{minted}
+	\item Draw labels
+	\begin{minted}{python}
+y_sample = []
+for i in range(m):
+	p = softmax(logits[i])
+	draw = np.random.multinomial(1, p)
+	y_sample.append(np.argmax(draw))
+	\end{minted}
+\end{itemize}
+%</Lecture-2>
+
+\end{document}

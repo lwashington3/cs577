@@ -1,0 +1,90 @@
+%! Author = Len Washington III
+%! Date = 9/11/25
+
+% Preamble
+\documentclass[
+	number={1}
+]{cs577homework}
+
+% Document
+\begin{document}
+
+\maketitle
+
+Throughout this homework, we let $g(t) = \max\{0, t\}$ denote the ReLU activation function.
+The derivative of $g$ is $\frac{dg}{dt}=1$ if $t > 0$ and $= 0$ otherwise.
+
+\problemline
+
+\problem{1.a}{2}
+\underline{Plot} over $x \in [-2, 2]$ the function
+\[ f(x; \vec{\theta}) := g(x + b_{1}) - g(-(x + b_{2})) + b_{3} \text{  where  } \vec{\theta} = [b_{1}, b_{2}, b_{3}] = [-1, 1, 1] \]
+(Hint: It is piecewise linear function with 3 linear pieces.)
+\addanswer{1a}
+
+\problemline
+
+\problem{1.b}{4}
+(Continuation of Problem 1.a)
+The empirical risk is $J(\vec{\theta}) = \frac{1}{m} \sum_{i}^{m} J_{i}(\vec{\theta})$ where the $i$-th contribution to the empirical risk with the square error loss is defined as
+\[ J_{i}(\vec{\theta}) = \left( y^{(i)} - f\left( x^{(i)}; \vec{\theta} \right) \right)^{2}. \]
+Consider the following dataset with $m = 3$:
+\begin{equation}
+	x^{(1)} = 2, \ \ \ x^{(2)} = -2, \ \ \ x^{(3)} = 0
+	\label{eq:1.b.x}
+\end{equation}
+%
+\begin{equation}
+	y^{(1)} = 5, \ \ \ y^{(2)} = -1, \ \ \ y^{(3)} = 2
+	\label{eq:1.b.y}
+\end{equation}
+
+\underline{Compute the numerical values} of $\frac{\partial J_{i}}{\partial \vec{\theta}}(\vec{\theta})$ for each $i = 1, 2, 3$, where $\vec{\theta}$ is as in part a.
+Show all work.
+(Hint: if your answer is correct, then you should have
+\begin{equation}
+	\frac{\partial J}{\partial b_{1}} (\vec{\theta}) = -2,\ \
+	\frac{\partial J}{\partial b_{2}} (\vec{\theta}) = \frac{2}{3},\ \
+	\frac{\partial J}{\partial b_{3}} (\vec{\theta}) = -2
+	\label{eq:1.b.3}
+\end{equation}
+where $J(\vec{\theta}) = \frac{1}{3}\sum_{i=1}^{n} J_{i}(\vec{\theta})$.)
+\addanswer{1b}
+
+\problemline
+
+\problem{1.c}{4}
+(Continuation of Problem 1.b)
+\underline{Calculate, showing work,} $\vec{\theta}$ after 1 gradient descent update with step size $\eta = \frac{3}{4}$.
+\underline{Plot} over $x \in [-2, 2]$ the function $f(x; \vec{\theta})$ with the updated parameters.
+(Hint: you should get [0.5, 0.5, 2.5])
+\addanswer{1c}
+
+\problemline
+
+\problem{2.a}{1}
+\underline{Plot} over $x \in [-1, 1]$ the function
+\[ f(x; \vec{\theta}) := g\left( w_{2} \cdot g(w_{1}\cdot x + b_{1}) + b_{2} \right) \text{  where  } \vec{\theta} = [b_{1}, w_{1}, b_{2}, w_{2}] = [0.5, 1, 1, -1]. \]
+\addanswer{2a}
+
+\problemline
+
+\problem{2.b}{3}
+(Continuation of Problem 2.a)
+Suppose that $x^{(i)}, y^{(i)} \in \mathbb{R} \times \mathbb{R}$ is a dataset where $i = 1, \dots, m$.
+Let $J_{i}(\vec{\theta}) = \left( y_{i} - f(x_{i}; \vec{\theta}) \right)^{2}.$
+Compute all partial derivatives (algebraically):
+\[
+	\frac{\partial J_{i}}{\partial b_{1}} (\vec{\theta}),
+	\frac{\partial J_{i}}{\partial w_{1}} (\vec{\theta}),
+	\frac{\partial J_{i}}{\partial b_{2}} (\vec{\theta}),
+	\frac{\partial J_{i}}{\partial w_{2}} (\vec{\theta}).
+\]
+\addanswer{2b}
+
+\problemline
+
+\problem{2.c}{6}
+Implement gradient descent in numpy in the Python notebook \texttt{hw1.ipynb} provided by filling in missing code block at \texttt{``YOUR CODE HERE''}.
+
+\end{document}

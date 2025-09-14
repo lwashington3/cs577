@@ -1,0 +1,18 @@
+{
+	"@jupyterlab/console-extension:tracker": {
+		"interactionMode": "notebook",
+		"showAllKernelActivity": false,
+		"promptCellConfig": {
+			"indentUnit": "Tab",
+			"lineNumbers": false
+		},
+		"codeCellConfig": {
+			"indentUnit": "Tab",
+			"lineNumbers": false,
+			"lineWrap": false
+		}
+	},
+	"@jupyterlab/apputils-extension:themes": {
+		"theme": "JupyterLab Dark"
+	}
+}
