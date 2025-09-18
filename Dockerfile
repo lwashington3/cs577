@@ -4,7 +4,7 @@ WORKDIR /cs577
 
 EXPOSE 9577
 
-CMD ["jupyter", "notebook", "--no-browser", "--allow-root", "--certfile=/cs577/jupyter/jupyter.crt", "--keyfile=/cs577/jupyter/jupyter.key", "--ip=0.0.0.0", "--port=9577"]
+CMD ["jupyter", "notebook", "--no-browser", "--allow-root", "--certfile=/cs577/jupyter/jupyter.crt", "--keyfile=/cs577/jupyter/jupyter.key", "--ip=0.0.0.0", "--port=9577", "--NotebookApp.token=701cc5786525fe54b422be3107e576d8321750163a9fc0f9964286933ccee587"]
 
 COPY requirements.txt ./
 COPY jupyter jupyter

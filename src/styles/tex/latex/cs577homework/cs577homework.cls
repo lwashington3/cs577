@@ -74,4 +74,4 @@
 }
 
 \newcommand{\pspace}{~\hspace*{0.25em}}
-\newcommand{\problemline}{\pspace\hline\pspace}
+\newcommand{\problemline}{\pspace\hrule\pspace}

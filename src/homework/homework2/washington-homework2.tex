@@ -1,0 +1,75 @@
+%! Author = Len Washington III
+%! Date = 9/18/25
+
+% Preamble
+\documentclass[
+	number={2}
+]{cs577homework}
+
+% Document
+\begin{document}
+
+\maketitle
+
+\problem{1}{5}
+Draw the computational graph for the following function.
+Then compute \texttt{wr.grad}, \texttt{wi.grad}, and \texttt{wo.grad} using backpropagation.
+
+\begin{minted}{python}
+x1 = ag.Scalar(2.0, label="z1\nleaf(x1)")
+h0 = ag.Scalar(3.0, label="z2\nleaf(h0)")
+wr = ag.Scalar(4.0, label="z3\nleaf(wr)")
+wi = ag.Scalar(5.0, label="z4\nleaf(wi)")
+wo = ag.Scalar(6.0, label="z5\nleaf(wo)")
+
+z1 = x1
+z2 = h0
+z3 = wr
+z4 = wi
+z5 = z3 * z2 # wr * h0
+z6 = z4 * z1 # wi * x1
+z7 = z5 + z6
+z8 = ag.relu(z7) # relu(wr * h0 + wi* x1)
+z9 = wo
+z10 = z8 * z9
+z10.backward()
+
+print(wr.grad, wi.grad, wo.grad)
+\end{minted}
+
+\noindent You are allowed to run the above using `\texttt{ex2.ipynb}' from Lecture 3 on Canvas.
+However, you must explicitly explain step-by-step what happens during each iteration of the backpropagation, e.g., during the $0^{\text{th}}$ iteration, what is the node being visited in the computation graph.
+For which nodes are the \texttt{grad} field updated?
+Repeat this for the $1^{\text{st}}$, $2^{\text{nd}}$ and so on iterations.
+A print-out of the computer-based calculation is not an acceptable answer.
+
+\addanswer{1}
+\problemline
+
+\problem{2}{5}
+Implement \texttt{def max(a, b)} for ag.Scalar
+\begin{minted}{python}
+def max(a: ag.Scalar, b: ag.Scalar):
+	"""
+	:param ag.Scalar a: input
+	:param ag.Scalar b: input
+	:return: Should be the maximum of a and b
+	"""
+	# [...]
+	output._backward = _backward
+	return output
+\end{minted}
+by filling in the function in \texttt{prob2.ipynb}.
+Do this \texttt{def min(a, b)} as well.
+For the backward function, if there are ties between \texttt{a.value} and \texttt{b.value} you can break ties arbitrarily.
+There is a ``Grad check'' at the end of the Jupyter notebook.
+If your implementation is correct, the Grad check code block should run silently.\\
+\indent
+Hint: if $f(a, b) = \max(a, b)$, what is $\frac{\partial}{\partial a}f(a, b)$ when $a \neq b$?
+
+\problemline
+
+\problem{3}{10}
+Go to \texttt{prob3.ipynb} provided by filling in missing code block at ``\texttt{YOUR ANSWER HERE}''.
+
+\end{document}
